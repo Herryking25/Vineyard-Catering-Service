@@ -1,9 +1,34 @@
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import heroImage from '../assets/hero.jpg';
+import menuImage3 from '../assets/menuImage3.jpg';
+import vineyardAbout from '../assets/Vineyard_about.jpg';
 
+const backgroundImages = [
+  { src: heroImage, alt: 'Catering setup 1' },
+  { src: menuImage3, alt: 'Catering setup 2' },
+  { src: vineyardAbout, alt: 'Catering setup 3' },
+];
 
 export default function Hero() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + backgroundImages.length) % backgroundImages.length);
+  };
+
   const scrollTo = (href: string) => {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -13,15 +38,51 @@ export default function Hero() {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={heroImage}
-          alt="Catering background"
-          className="w-full h-full object-cover"
-        />
+      {/* Background carousel */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        {backgroundImages.map((image, index) => (
+          <motion.img
+            key={index}
+            src={image.src}
+            alt={image.alt}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: index === currentImageIndex ? 1 : 0 }}
+            transition={{ duration: 1 }}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ))}
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+      </div>
+
+      {/* Carousel controls */}
+      <button
+        onClick={prevImage}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors cursor-pointer"
+        aria-label="Previous image"
+      >
+        <ChevronLeft size={24} />
+      </button>
+      <button
+        onClick={nextImage}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors cursor-pointer"
+        aria-label="Next image"
+      >
+        <ChevronRight size={24} />
+      </button>
+
+      {/* Dot indicators */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        {backgroundImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentImageIndex(index)}
+            className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
+              index === currentImageIndex ? 'bg-orange-500 w-8' : 'bg-white/50 hover:bg-white/70'
+            }`}
+            aria-label={`Go to image ${index + 1}`}
+          />
+        ))}
       </div>
 
       {/* Content */}
